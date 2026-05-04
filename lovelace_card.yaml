@@ -1,0 +1,45 @@
+# Lovelace-Card für das LED-Badge
+# ============================================================
+# Im Dashboard:
+#   1. "Karte hinzufügen" → "Manuell"
+#   2. Diesen YAML-Block reinkopieren (ohne den Kommentar oben)
+#
+# Voraussetzung: led_badge.yaml als Package aktiv (siehe Datei).
+#
+# Optisch ist's eine entities-Card mit einem Send-Button am Ende.
+# Falls du was Schickeres willst (z.B. mushroom-cards via HACS), lassen
+# sich die gleichen Entitäten dort genauso einbinden.
+
+type: entities
+title: LED-Badge
+icon: mdi:badge-account-horizontal-outline
+state_color: true
+entities:
+  - entity: input_text.led_badge_text
+    name: Text
+
+  - type: divider
+
+  - entity: input_select.led_badge_icon
+    name: Icon
+  - entity: input_select.led_badge_icon_position
+    name: Position
+
+  - type: divider
+
+  - entity: input_select.led_badge_mode
+    name: Modus
+  - entity: input_number.led_badge_speed
+    name: Geschwindigkeit
+  - entity: input_number.led_badge_brightness
+    name: Helligkeit
+  - entity: input_boolean.led_badge_blink
+    name: Blinken
+
+  - type: divider
+
+  - type: call-service
+    name: An Badge senden
+    icon: mdi:send
+    action_name: Senden
+    service: script.led_badge_send

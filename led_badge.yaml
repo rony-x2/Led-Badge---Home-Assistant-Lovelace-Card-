@@ -1,0 +1,119 @@
+# /config/packages/led_badge.yaml
+#
+# Helper-Variablen + Skript für die Bedienung des LED-Badges
+# über eine Lovelace-Karte im Dashboard.
+#
+# Voraussetzung: in /config/configuration.yaml einmalig (falls noch nicht
+# vorhanden) Packages aktivieren:
+#
+#   homeassistant:
+#     packages: !include_dir_named packages
+#
+# Danach diese Datei nach /config/packages/led_badge.yaml legen und HA
+# neu starten (oder "YAML neu laden → Skripts" + "Eingabe-Helfer").
+
+input_text:
+  led_badge_text:
+    name: Badge-Text
+    icon: mdi:format-text
+    max: 100
+    initial: ""
+
+input_select:
+  led_badge_icon:
+    name: Icon
+    icon: mdi:emoticon-outline
+    options:
+      - keins
+      - heart
+      - wifi
+      - bell
+      - check
+      - cross
+      - warn
+      - home
+      - smile
+      - arrow_left
+      - arrow_right
+      - music
+      - key
+      - battery
+    initial: keins
+
+  led_badge_icon_position:
+    name: Icon-Position
+    icon: mdi:format-horizontal-align-left
+    options:
+      - vorne
+      - hinten
+    initial: vorne
+
+  led_badge_mode:
+    name: Modus
+    icon: mdi:animation
+    options:
+      - scrollen
+      - statisch
+    initial: scrollen
+
+input_number:
+  led_badge_speed:
+    name: Geschwindigkeit
+    icon: mdi:speedometer
+    min: 1
+    max: 8
+    step: 1
+    initial: 5
+    mode: slider
+
+  led_badge_brightness:
+    name: Helligkeit
+    icon: mdi:brightness-6
+    min: 25
+    max: 100
+    step: 25
+    initial: 75
+    unit_of_measurement: "%"
+    mode: slider
+
+input_boolean:
+  led_badge_blink:
+    name: Blinken
+    icon: mdi:lightbulb-on-outline
+
+script:
+  led_badge_send:
+    alias: Badge aktualisieren
+    icon: mdi:send
+    mode: single
+    sequence:
+      - variables:
+          # Eingaben einlesen
+          raw_text: "{{ states('input_text.led_badge_text') | trim }}"
+          icon_name: "{{ states('input_select.led_badge_icon') }}"
+          icon_pos: "{{ states('input_select.led_badge_icon_position') }}"
+          mode_label: "{{ states('input_select.led_badge_mode') }}"
+          # Icon-Token nur wenn Icon != "keins"
+          icon_token: >-
+            {% if icon_name != 'keins' %}:{{ icon_name }}:{% else %}{% endif %}
+          # Text + Icon zusammenbauen
+          composed: >-
+            {%- if icon_token == '' -%}
+              {{ raw_text }}
+            {%- elif raw_text == '' -%}
+              {{ icon_token }}
+            {%- elif icon_pos == 'vorne' -%}
+              {{ icon_token }} {{ raw_text }}
+            {%- else -%}
+              {{ raw_text }} {{ icon_token }}
+            {%- endif -%}
+          # UI-Label → Protocol-Mode
+          mode_value: "{{ 'left' if mode_label == 'scrollen' else 'fixed' }}"
+      - service: led_badge.send
+        data:
+          brightness: "{{ states('input_number.led_badge_brightness') | int }}"
+          messages:
+            - text: "{{ composed }}"
+              mode: "{{ mode_value }}"
+              speed: "{{ states('input_number.led_badge_speed') | int }}"
+              blink: "{{ is_state('input_boolean.led_badge_blink', 'on') }}"
