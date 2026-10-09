@@ -78,3 +78,7 @@ mode_value: >-
 ## Mehrere Nachrichten gleichzeitig
 
 Die Karte ist auf eine Nachricht ausgelegt – das deckt die meisten Fälle ab. Wenn du mehrere Slots gleichzeitig nutzen willst (z. B. abwechselnd Name + WLAN), bau dir ein zweites Skript, das fest verdrahtete `messages:` an die Aktion schickt, wie im [README der Integration](https://github.com/rony-x2/Led-Badge-44x11---Home-Assistant#beispiel-name-und-wlan-zugang-anzeigen) beschrieben. Die Karte hier macht keinen Sinn dafür, da würden ihr UI-Elemente wachsen wie ein Tannenbaum.
+
+## Lizenz
+
+GPL-3.0 – siehe [LICENSE](LICENSE). © 2026 Dennis Deutschkämer
