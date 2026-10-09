@@ -11,13 +11,15 @@
 #
 # Danach diese Datei nach /config/packages/led_badge.yaml legen und HA
 # neu starten (oder "YAML neu laden → Skripts" + "Eingabe-Helfer").
+#
+# Bewusst ohne "initial:"-Werte: so stellt Home Assistant nach einem
+# Neustart die zuletzt eingestellten Werte wieder her.
 
 input_text:
   led_badge_text:
     name: Badge-Text
     icon: mdi:format-text
     max: 100
-    initial: ""
 
 input_select:
   led_badge_icon:
@@ -38,7 +40,6 @@ input_select:
       - music
       - key
       - battery
-    initial: keins
 
   led_badge_icon_position:
     name: Icon-Position
@@ -46,7 +47,6 @@ input_select:
     options:
       - vorne
       - hinten
-    initial: vorne
 
   led_badge_mode:
     name: Modus
@@ -54,7 +54,6 @@ input_select:
     options:
       - scrollen
       - statisch
-    initial: scrollen
 
 input_number:
   led_badge_speed:
@@ -63,7 +62,6 @@ input_number:
     min: 1
     max: 8
     step: 1
-    initial: 5
     mode: slider
 
   led_badge_brightness:
@@ -72,7 +70,6 @@ input_number:
     min: 25
     max: 100
     step: 25
-    initial: 75
     unit_of_measurement: "%"
     mode: slider
 
@@ -89,7 +86,10 @@ script:
     sequence:
       - variables:
           # Eingaben einlesen
-          raw_text: "{{ states('input_text.led_badge_text') | trim }}"
+          # has_value: beim allerersten Start ist der Helfer noch "unknown"
+          raw_text: >-
+            {{ states('input_text.led_badge_text') | trim
+               if has_value('input_text.led_badge_text') else '' }}
           icon_name: "{{ states('input_select.led_badge_icon') }}"
           icon_pos: "{{ states('input_select.led_badge_icon_position') }}"
           mode_label: "{{ states('input_select.led_badge_mode') }}"
@@ -109,7 +109,10 @@ script:
             {%- endif -%}
           # UI-Label → Protocol-Mode
           mode_value: "{{ 'left' if mode_label == 'scrollen' else 'fixed' }}"
-      - service: led_badge.send
+      # Nichts senden, wenn weder Text noch Icon gesetzt ist
+      - condition: template
+        value_template: "{{ composed | string | trim | length > 0 }}"
+      - action: led_badge.send
         data:
           brightness: "{{ states('input_number.led_badge_brightness') | int }}"
           messages:

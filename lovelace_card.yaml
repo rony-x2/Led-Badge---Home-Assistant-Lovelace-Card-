@@ -6,7 +6,7 @@
 #
 # Voraussetzung: led_badge.yaml als Package aktiv (siehe Datei).
 #
-# Optisch ist's eine entities-Card mit einem Send-Button am Ende.
+# Optisch ist's eine entities-Card mit einem Senden-Button am Ende.
 # Falls du was Schickeres willst (z.B. mushroom-cards via HACS), lassen
 # sich die gleichen Entitäten dort genauso einbinden.
 
@@ -38,8 +38,7 @@ entities:
 
   - type: divider
 
-  - type: call-service
+  - entity: script.led_badge_send
     name: An Badge senden
     icon: mdi:send
     action_name: Senden
-    service: script.led_badge_send
